@@ -1,7 +1,6 @@
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Scanner;
 
 
@@ -46,7 +45,8 @@ public class inputReader {
                 xml_file_name = input_reader.nextLine();
             }
             // Parse the name of the xml file to XmlParser class in order to create the Bayesian Network
-            this.net = new XmlParser("src/" + xml_file_name).getNetwork();
+//            this.net = new XmlParser("src/" + xml_file_name).getNetwork();
+            this.net = new XmlParser(xml_file_name).getNetwork();
 
             String quest_num = "";
             // This part deals with all the questions by order:

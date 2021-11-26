@@ -99,7 +99,9 @@ public class VariableElimination {
         }
 
         // extract elimination order from the string.
-        this.hiddenByOrder.addAll(List.of(q.replace(" ", "").split("-")));
+        String[] h = q.replace(" ", "").split("-");
+        Collections.addAll(this.hiddenByOrder, h);
+//        this.hiddenByOrder.addAll(List.of(q.replace(" ", "").split("-")));
     }
 
 
