@@ -341,8 +341,6 @@ public class VariableElimination {
         for (int i = 0; i < vars2Join.length; i++) {
             for (String f1_key : f1_keys) {
                 for (String f2_key : f2_keys) {
-//                String[] temp1 = f1_key.substring(2).split("[|,)]+");
-//                String[] temp2 = f2_key.substring(2).split("[|,)]+");
                     String[] t = vars2Join[i].split(",");
                     int counter = 0;
                     for(int j = 1; j < t.length; j++){
@@ -362,18 +360,6 @@ public class VariableElimination {
                         new_factor.put(key, val);
                     }
                 }
-//                for (String t1 : temp1) {
-//                    for (String t2 : temp2) {
-//                        if (t1.equals(t2)) {
-//                            double v1 = f1.factor.get(f1_key);
-//                            double v2 = f2.factor.get(f2_key);
-//                            double val = v1 * v2;
-//                            this.multiplyActions++;
-//                            String key = generateNewKey(f1_key, f2_key);
-//                            new_factor.put(key, val);
-//                        }
-//                    }
-//                }
             }
         }
         int ind = Integer.parseInt(this.factors.get(this.factors.size() - 1).index) + 1;
@@ -393,11 +379,6 @@ public class VariableElimination {
             for(int j = 0; j < f2_vars.length; j++){
                 if(!f1_vars[i].equals("") && !f2_vars[j].equals("")) {
                     if (f1_vars[i].equals(f2_vars[j])) {
-//                        String[] r_outcomes = this.network.getVariable(f1_vars[i]).getOutcomes();
-//                        for(int k = 0; k < r_outcomes.length; k++){
-//                            String temp = f1_vars[i] + "=" + r_outcomes[k];
-//                            vars2Join.add(temp);
-//                        }
                         vars2Join.add(f1_vars[i]);
                         f1_vars[i] = "";
                         f2_vars[j] = "";
@@ -421,7 +402,7 @@ public class VariableElimination {
         int jump = sumOutcomes;
         for(int i = 0; i < vars2Join.size(); i++) {
             String[] outcomes = allOutcomes.get(i);
-            jump = jump / vars2Join.get(i).length();
+            jump = jump / outcomes.length;
             int k = 0, j = 0, counter = 0;
             while(k < sumOutcomes) {
                 if (counter < jump) {
@@ -467,20 +448,52 @@ public class VariableElimination {
             }
             String key = "P(" + add_by + ")";
             for(int j = 0; j < keys.length; j++){
-                if(i != j) {
-                    if (keys[j].contains(add_by) && !values_to_sum.contains(keys[j])) {
+                if(i != j && !values_to_sum.contains(keys[j])) {
+                    if (keys[j].contains(add_by)) {
                         values_to_sum.add(keys[j]);
                     }
                 }
             }
+//            for(String t: t1){
+//                if(!t.contains(hidden_name)){
+//                    add_by += "," + t;
+//                }
+//            }
+//            if(add_by.length() > 1) {
+//                add_by = add_by.substring(1);
+//            }
+//            String key = "P(" + add_by + ")";
+//            int amount_of_outcomes = this.network.getVariable(hidden_name).getOutcomes().length;
+//            for(int j = 0; j < keys.length; j++){
+//                if(i != j && !values_to_sum.contains(keys[j])) {
+//                    String[] split_key = keys[j].substring(2, keys[j].indexOf(")")).split(",");
+//                    int count_matching = 0;
+//                    for(String var: split_key){
+//                        if(add_by.contains(var)){
+//                            count_matching++;
+//                        }
+//                    }
+//                    if(count_matching == amount_of_outcomes){
+//                        values_to_sum.add(keys[j]);
+//                    }
+//                    if(values_to_sum.size() == amount_of_outcomes){
+//                        break;
+//                    }
+//                    if (keys[j].contains(add_by) && !values_to_sum.contains(keys[j])) {
+//                        values_to_sum.add(keys[j]);
+//                    }
+//                }
+//            }
             double value = 0;
-            for(String val: values_to_sum){
-                value += f.factor.get(val);
-            }
-            if(!new_CPT.containsKey(key)) {
+            if (!new_CPT.containsKey(key)) {
+                for (String val : values_to_sum) {
+                    value += f.factor.get(val);
+                }
+//            if(!new_CPT.containsKey(key)) {
                 this.addActions += values_to_sum.size() - 1;
+                new_CPT.put(key, value);
             }
-            new_CPT.put(key, value);
+//            new_CPT.put(key, value);
             values_to_sum.clear();
         }
         int ind = Integer.parseInt(this.factors.get(this.factors.size() - 1).index) + 1;
