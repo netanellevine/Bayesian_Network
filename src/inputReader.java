@@ -4,12 +4,7 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 
-/**
- *
- */
 public class inputReader {
-    private File xml_file;
-    private File input_file;
     private Network net;
     private ArrayList<String> VE_questions;
     private ArrayList<String> BB_questions;
@@ -32,20 +27,19 @@ public class inputReader {
      * In order to solve the type of questions 2) we will use the Bayes Ball Algorithm.
      * In order to solve the type of questions 3) we will use the Variable elimination Algorithm.
      *
-     * @param @file_name
-     * @Throws FileNotFoundException if the file wasn't found.
+     * @param file_name - String file_name
+     * @Throws  - FileNotFoundException if the file wasn't found.
      */
     public inputReader(String file_name) {
         try {
-            this.input_file = new File((file_name));
-            Scanner input_reader = new Scanner(this.input_file);
+            File input_file = new File((file_name));
+            Scanner input_reader = new Scanner(input_file);
             // This part deals with the first line i.e. the xml file name.
             String xml_file_name = "";
             if (input_reader.hasNextLine()) {
                 xml_file_name = input_reader.nextLine();
             }
-            // Parse the name of the xml file to XmlParser class in order to create the Bayesian Network
-//            this.net = new XmlParser("src/" + xml_file_name).getNetwork();
+            // Parse the name of the xml file to XmlParser class in order to create the Bayesian Network.
             this.net = new XmlParser(xml_file_name).getNetwork();
 
             String quest_num = "";
