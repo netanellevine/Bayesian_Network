@@ -5,26 +5,31 @@ import java.util.ArrayList;
 
 public class Ex1 {
     public static void main(String[] args) {
-        writeToOutput("input2.txt");
+        writeToOutput("input.txt");
     }
 
     public static void writeToOutput(String file_name){
-        inputReader parserOrig = new inputReader(file_name);
-        ArrayList<String> VEQ = parserOrig.getVE_questions();
-        ArrayList<String> BBQ = parserOrig.getBB_questions();
+        // parse the file in the class inputReader which activates the class XmlParser for the Xml parsing.
+        inputReader firstParse = new inputReader(file_name);
+        // all the Variable Elimination question.
+        ArrayList<String> VEQ = firstParse.getVE_questions();
+        // all the Bayes Ball questions.
+        ArrayList<String> BBQ = firstParse.getBB_questions();
         String output = "";
+        // go over on all the Bayes Ball questions.
         for (String item : BBQ) {
-            Network net = parserOrig.getNet();
+            Network net = firstParse.getNet();
             output += (BayesBallAlgo.Bayes(net, item)) + "\n";
         }
+        // go over on all the Variable Elimination questions.
         for (String value : VEQ) {
             inputReader parser = new inputReader(file_name);
             Network net = parser.getNet();
             VariableElimination VEA = new VariableElimination(value, net);
             output += (VEA.getAnswer() + "," + VEA.getAddActions() + "," + VEA.getMultiplyActions()) + "\n";
-
         }
         try {
+            // write to output.
             FileWriter myWriter = new FileWriter("output.txt");
             myWriter.write(output);
             myWriter.close();
