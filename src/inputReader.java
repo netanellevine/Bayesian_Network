@@ -60,6 +60,7 @@ public class inputReader {
                 }
             }
         } catch (FileNotFoundException e) {
+            e.printStackTrace();
             System.out.println("Input file not found!");
         }
     }

@@ -3,14 +3,14 @@ import java.util.*;
 public class VariableElimination {
     private Variable query;
     private String queryOutcome;
-    private ArrayList<Variable> evidence;
+    private final ArrayList<Variable> evidence;
     private String copyOfEvidence;
     private ArrayList<Factor> factors;
-    private ArrayList<String> hiddenByOrder;
+    private final ArrayList<String> hiddenByOrder;
     private final Network network;
     private int multiplyActions = 0;
     private int addActions = 0;
-    private String answer;
+    private final String answer;
     private String question;
 
 
@@ -35,7 +35,6 @@ public class VariableElimination {
         } else {
             this.answer = String.valueOf((double)Math.round(answerIsKnown * 100000d) / 100000d);
         }
-//        System.out.println(this.answer);
     }
 
     /**
@@ -85,7 +84,6 @@ public class VariableElimination {
         this.queryOutcome = q.substring(ind2 + 1, ind1);
 
         // extract all the evidence from the string.
-//        copyEvidence(q);
         q = q.substring(ind1 + 1);
         String evidence_name;
         while(q.indexOf(" ") != 0){
@@ -182,7 +180,6 @@ public class VariableElimination {
         while(!this.hiddenByOrder.isEmpty()){
             String h = this.hiddenByOrder.get(0) + "";
             int hidden_outcomes = this.network.getVariable(h).getOutcomes().length;
-//            this.hiddenByOrder.remove(h);
             ArrayList<Factor> factors_to_join = new ArrayList<>();
             for(Factor f: this.factors){
                 if(f.getName().contains(h)){
@@ -301,8 +298,8 @@ public class VariableElimination {
     private void deleteChildren(Variable hidden) {
         if(hidden != null) {
             if (hidden.getChildren().size() > 0) {
-                boolean deleteEvidence = false;
-                String deleted_evi = "";
+                boolean deleteEvidence;
+                String deleted_evi;
                 for (int i = 0; i < hidden.getChildren().size(); i++) {
                     deleteEvidence = this.evidence.contains(hidden.getChildren().get(i));
                     if(deleteEvidence){
@@ -311,9 +308,9 @@ public class VariableElimination {
                         int end = this.question.indexOf(")");
                         this.copyOfEvidence = "";
                         String[] evi = this.question.substring(start + 1, end).split(",");
-                        for(int j = 0; j < evi.length; j++){
-                            if(!evi[j].contains(deleted_evi)){
-                                this.copyOfEvidence +=  "," + evi[j];
+                        for (String s : evi) {
+                            if (!s.contains(deleted_evi)) {
+                                this.copyOfEvidence += "," + s;
                             }
                         }
                         this.copyOfEvidence = "|" + this.copyOfEvidence.substring(1);
@@ -340,20 +337,19 @@ public class VariableElimination {
         String[] f2_keys = f2.factor.keySet().toArray(new String[0]);
         String[] vars2Join = whichVariableToJoin(f1, f2);
         HashMap<String, Double> new_factor = new HashMap<>();
-        for (int i = 0; i < vars2Join.length; i++) {
+        for (String s : vars2Join) {
             for (String f1_key : f1_keys) {
                 for (String f2_key : f2_keys) {
-                    String[] t = vars2Join[i].split(",");
+                    String[] t = s.split(",");
                     int counter = 0;
-                    for(int j = 1; j < t.length; j++){
-                        if(f1_key.contains(t[j]) && f2_key.contains(t[j])){
+                    for (int j = 1; j < t.length; j++) {
+                        if (f1_key.contains(t[j]) && f2_key.contains(t[j])) {
                             counter++;
-                        }
-                        else{
+                        } else {
                             break;
                         }
                     }
-                    if(counter == t.length -1){
+                    if (counter == t.length - 1) {
                         double v1 = f1.factor.get(f1_key);
                         double v2 = f2.factor.get(f2_key);
                         double val = v1 * v2;
@@ -419,8 +415,6 @@ public class VariableElimination {
                 }
             }
         }
-
-
         return ans;
     }
 
@@ -440,22 +434,6 @@ public class VariableElimination {
             values_to_sum.add(keys[i]);
             String[] t1 = keys[i].substring(2, keys[i].length() - 1).split(",");
             String add_by = "";
-//            for(String t: t1){
-//                if(!t.contains(hidden_name)){
-//                    add_by += "," + t;
-//                }
-//            }
-//            if(add_by.length() > 1) {
-//                add_by = add_by.substring(1);
-//            }
-//            String key = "P(" + add_by + ")";
-//            for(int j = 0; j < keys.length; j++){
-//                if(i != j && !values_to_sum.contains(keys[j])) {
-//                    if (keys[j].contains(add_by)) {
-//                        values_to_sum.add(keys[j]);
-//                    }
-//                }
-//            }
             for(String t: t1){
                 if(!t.contains(hidden_name)){
                     add_by += "," + t;
@@ -470,26 +448,18 @@ public class VariableElimination {
                 if(i != j && !values_to_sum.contains(keys[j])) {
                     String[] split_key = keys[j].substring(2, keys[j].indexOf(")")).split(",");
                     String add_by_copy = "";
-                    int count_matching = 0;
                     for(String var: split_key){
                         if(add_by.contains(var)){
                             add_by_copy += "," + var;
-                            count_matching++;
                         }
                     }
                     add_by_copy = add_by_copy.length() > 0 ? add_by_copy.substring(1): add_by_copy;
                     if(add_by.equals(add_by_copy)){
                         values_to_sum.add(keys[j]);
                     }
-//                    if(count_matching == amount_of_outcomes){
-//                        values_to_sum.add(keys[j]);
-//                    }
                     if(values_to_sum.size() == amount_of_outcomes){
                         break;
                     }
-//                    if (keys[j].contains(add_by) && !values_to_sum.contains(keys[j])) {
-//                        values_to_sum.add(keys[j]);
-//                    }
                 }
             }
             double value = 0;
@@ -497,11 +467,9 @@ public class VariableElimination {
                 for (String val : values_to_sum) {
                     value += f.factor.get(val);
                 }
-//            if(!new_CPT.containsKey(key)) {
                 this.addActions += values_to_sum.size() - 1;
                 new_CPT.put(key, value);
             }
-//            new_CPT.put(key, value);
             values_to_sum.clear();
         }
         int ind = Integer.parseInt(this.factors.get(this.factors.size() - 1).index) + 1;
