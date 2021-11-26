@@ -440,22 +440,6 @@ public class VariableElimination {
             values_to_sum.add(keys[i]);
             String[] t1 = keys[i].substring(2, keys[i].length() - 1).split(",");
             String add_by = "";
-            for(String t: t1){
-                if(!t.contains(hidden_name)){
-                    add_by += "," + t;
-                }
-            }
-            if(add_by.length() > 1) {
-                add_by = add_by.substring(1);
-            }
-            String key = "P(" + add_by + ")";
-            for(int j = 0; j < keys.length; j++){
-                if(i != j && !values_to_sum.contains(keys[j])) {
-                    if (keys[j].contains(add_by)) {
-                        values_to_sum.add(keys[j]);
-                    }
-                }
-            }
 //            for(String t: t1){
 //                if(!t.contains(hidden_name)){
 //                    add_by += "," + t;
@@ -465,27 +449,49 @@ public class VariableElimination {
 //                add_by = add_by.substring(1);
 //            }
 //            String key = "P(" + add_by + ")";
-//            int amount_of_outcomes = this.network.getVariable(hidden_name).getOutcomes().length;
 //            for(int j = 0; j < keys.length; j++){
 //                if(i != j && !values_to_sum.contains(keys[j])) {
-//                    String[] split_key = keys[j].substring(2, keys[j].indexOf(")")).split(",");
-//                    int count_matching = 0;
-//                    for(String var: split_key){
-//                        if(add_by.contains(var)){
-//                            count_matching++;
-//                        }
-//                    }
-//                    if(count_matching == amount_of_outcomes){
-//                        values_to_sum.add(keys[j]);
-//                    }
-//                    if(values_to_sum.size() == amount_of_outcomes){
-//                        break;
-//                    }
-//                    if (keys[j].contains(add_by) && !values_to_sum.contains(keys[j])) {
+//                    if (keys[j].contains(add_by)) {
 //                        values_to_sum.add(keys[j]);
 //                    }
 //                }
 //            }
+            for(String t: t1){
+                if(!t.contains(hidden_name)){
+                    add_by += "," + t;
+                }
+            }
+            if(add_by.length() > 1) {
+                add_by = add_by.substring(1);
+            }
+            String key = "P(" + add_by + ")";
+            int amount_of_outcomes = this.network.getVariable(hidden_name).getOutcomes().length;
+            for(int j = 0; j < keys.length; j++){
+                if(i != j && !values_to_sum.contains(keys[j])) {
+                    String[] split_key = keys[j].substring(2, keys[j].indexOf(")")).split(",");
+                    String add_by_copy = "";
+                    int count_matching = 0;
+                    for(String var: split_key){
+                        if(add_by.contains(var)){
+                            add_by_copy += "," + var;
+                            count_matching++;
+                        }
+                    }
+                    add_by_copy = add_by_copy.length() > 0 ? add_by_copy.substring(1): add_by_copy;
+                    if(add_by.equals(add_by_copy)){
+                        values_to_sum.add(keys[j]);
+                    }
+//                    if(count_matching == amount_of_outcomes){
+//                        values_to_sum.add(keys[j]);
+//                    }
+                    if(values_to_sum.size() == amount_of_outcomes){
+                        break;
+                    }
+//                    if (keys[j].contains(add_by) && !values_to_sum.contains(keys[j])) {
+//                        values_to_sum.add(keys[j]);
+//                    }
+                }
+            }
             double value = 0;
             if (!new_CPT.containsKey(key)) {
                 for (String val : values_to_sum) {

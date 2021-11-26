@@ -5,7 +5,7 @@ import java.util.ArrayList;
 
 public class Ex1 {
     public static void main(String[] args) {
-        writeToOutput("input.txt");
+        writeToOutput("input2.txt");
     }
 
     public static void writeToOutput(String file_name){
@@ -26,7 +26,6 @@ public class Ex1 {
         }
         try {
             FileWriter myWriter = new FileWriter("output.txt");
-//            System.out.println(output);
             myWriter.write(output);
             myWriter.close();
             System.out.println("Successfully wrote to the file.");
