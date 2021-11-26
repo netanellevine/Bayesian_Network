@@ -3,9 +3,8 @@ import java.util.ArrayList;
 public class BayesBallAlgo {
 
 
-
-    // independent return TRUE dependent return FALSE
     public static String Bayes(Network net, String question){
+        // The first part is to take from the String all the data we need about the question.
         String[] question_split1 = question.split("-");
         String q1 = question_split1[0];
         int ind = question_split1[1].indexOf("|");
@@ -20,19 +19,24 @@ public class BayesBallAlgo {
             }
         }
         ArrayList<Variable> colored = new ArrayList<>();
-//        colored.add(null);
         boolean independent = BayesBall(Q1, Q2, null, colored);
         net.resetEvidence();
         return (independent) ? "yes" : "no";
     }
 
-
-//     independent return TRUE, dependent return FALSE
+    /**
+     * This method checks whether two Variables in the Network are Conditionally Independent or not.
+     * The rules of moving foreword in the Network (according to BayesBall Algorithm) is:
+     * in a current node there are two things that determine where can we go, 1) where we came from(father or child),
+     * 2) is the current node is evidence in the question or not.
+     * According to this information we can determine where to go.
+     * @param src - Variable src, where we start to check if route exists.
+     * @param dest - Variable dest, where we want to reach.
+     * @param came_from - Variable came_from, where we came from.
+     * @param colored - ArrayList<Variable> of the Variables we've been that we can't visit again.
+     * @return return TRUE if independent, dependent return FALSE.
+     */
     private static boolean BayesBall(Variable src, Variable dest, Variable came_from, ArrayList<Variable> colored) {
-
-//        if (came_from != null) {
-//            System.out.println("src is: " + src.getVar_name() + ", dest is: " + dest.getVar_name() + ", came from is: " + came_from.getVar_name());
-//        }
         if (src.getVar_name().equals(dest.getVar_name())) {
             return false;
         }
@@ -58,7 +62,7 @@ public class BayesBallAlgo {
                 return true;
             }
         } else { // Source is not given.
-//            // If came from a parent -> can go to all the children.
+            // Came from a child -> can go to children and parents.
             if (src.getChildren().contains(came_from) || came_from == null) {
                 for (int i = 0; i < src.getParents().size(); i++) {
                     var = src.getParents().get(i);
@@ -80,9 +84,8 @@ public class BayesBallAlgo {
                         }
                     }
                 }
-                return true;
-            } else { // Came from a child -> can go to children and parents.
-                // If came from a parent -> can go to all the children.
+            } else { // Came from a parent.
+                // came from a parent -> can go to all the children.
                 for (int i = 0; i < src.getChildren().size(); i++) {
                     var = src.getChildren().get(i);
                     if (!colored.contains(var)) {
@@ -92,8 +95,10 @@ public class BayesBallAlgo {
                         }
                     }
                 }
-                return true;
             }
+            return true;
         }
     }
+
+
 }
