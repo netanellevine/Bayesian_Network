@@ -30,7 +30,9 @@ public class XmlParser {
                 if (line_step1.contains("<DEFINITION>")) {
                     break;
                 }
-                line_step1 = line_step1.stripLeading();
+//                line_step1 = line_step1.stripLeading();
+                line_step1 = line_step1.replaceAll("\t", "");
+                line_step1 = line_step1.replaceAll(" ", "");
                 // chunk is the String that keeps all the data of a single variable
                 // once there is a line with '/' means that now it's </VARIABLE>
                 // which means we finish with this variable.
