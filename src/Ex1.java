@@ -5,7 +5,7 @@ import java.util.ArrayList;
 
 public class Ex1 {
     public static void main(String[] args) {
-        writeToOutput("input.txt");
+        writeToOutput("input2.txt");
     }
 
     public static void writeToOutput(String file_name){

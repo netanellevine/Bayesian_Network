@@ -114,7 +114,7 @@ public class VariableElimination {
 
     private void removeIfOneValued(){
         for(int i = 0; i < this.factors.size(); i++){
-            if(this.factors.get(i).size == 1){
+            if(this.factors.get(i).getSize() == 1){
                 this.factors.remove(i);
                 i--;
             }
@@ -136,12 +136,12 @@ public class VariableElimination {
                 for(String e: evidence){
                     name = e.substring(0, e.indexOf("="));
                     Factor f = this.factors.get(i);
-                    if(f.name.contains(name)){
-                        String[] keys = f.factor.keySet().toArray(new String[0]);
+                    if(f.getName().contains(name)){
+                        String[] keys = f.getTable().keySet().toArray(new String[0]);
                         for(String key: keys){
                             if(!key.contains(e)){
                                 f.removeValue(key, name);
-                                if(f.size == 1){
+                                if(f.getSize() == 1){
                                     this.factors.remove(f);
                                     i--;
                                     break;
@@ -155,12 +155,12 @@ public class VariableElimination {
             name = evidence[0].substring(0, evidence[0].indexOf("="));
             for (int i = 0; i < this.factors.size(); i++) {
                 Factor f = this.factors.get(i);
-                if(f.name.contains(name)){
-                    String[] keys = f.factor.keySet().toArray(new String[0]);
+                if(f.getName().contains(name)){
+                    String[] keys = f.getTable().keySet().toArray(new String[0]);
                     for(String key: keys){
                         if(!key.contains(evidence[0])){
                             f.removeValue(key, name);
-                            if(f.size == 1){
+                            if(f.getSize() == 1){
                                 this.factors.remove(f);
                                 i--;
                                 break;
@@ -192,7 +192,7 @@ public class VariableElimination {
                 factors_to_join.remove(0);
                 factors_to_join.remove(0);
             }
-            if(factors_to_join.get(0).size / hidden_outcomes == 1){
+            if(factors_to_join.get(0).getSize() / hidden_outcomes == 1){
                 this.factors.remove(factors_to_join.get(0));
             }
             else {
@@ -206,16 +206,16 @@ public class VariableElimination {
         }
         double sum_of_outcomes = 0;
         Factor f = this.factors.get(0);
-        String[] f_keys = f.factor.keySet().toArray(new String[0]);
+        String[] f_keys = f.getTable().keySet().toArray(new String[0]);
         String key = "";
         for(String k: f_keys){
-            sum_of_outcomes += f.factor.get(k);
+            sum_of_outcomes += f.getTable().get(k);
             if(k.contains(this.query.getVar_name() + "=" + this.queryOutcome)){
                 key = k;
             }
         }
         this.addActions += f_keys.length - 1;
-        double value = f.factor.get(key) / sum_of_outcomes;
+        double value = f.getTable().get(key) / sum_of_outcomes;
         return String.valueOf((double)Math.round(value * 100000d) / 100000d);
     }
 
@@ -333,8 +333,8 @@ public class VariableElimination {
      * @return new_factor - Factor that combines the CPT of both of the f1 and f2.
      */
     private Factor Join(Factor f1, Factor f2){
-        String[] f1_keys = f1.factor.keySet().toArray(new String[0]);
-        String[] f2_keys = f2.factor.keySet().toArray(new String[0]);
+        String[] f1_keys = f1.getTable().keySet().toArray(new String[0]);
+        String[] f2_keys = f2.getTable().keySet().toArray(new String[0]);
         String[] vars2Join = whichVariableToJoin(f1, f2);
         HashMap<String, Double> new_factor = new HashMap<>();
         for (String s : vars2Join) {
@@ -350,8 +350,8 @@ public class VariableElimination {
                         }
                     }
                     if (counter == t.length - 1) {
-                        double v1 = f1.factor.get(f1_key);
-                        double v2 = f2.factor.get(f2_key);
+                        double v1 = f1.getTable().get(f1_key);
+                        double v2 = f2.getTable().get(f2_key);
                         double val = v1 * v2;
                         this.multiplyActions++;
                         String key = generateNewKey(f1_key, f2_key);
@@ -360,7 +360,7 @@ public class VariableElimination {
                 }
             }
         }
-        int ind = Integer.parseInt(this.factors.get(this.factors.size() - 1).index) + 1;
+        int ind = Integer.parseInt(this.factors.get(this.factors.size() - 1).getIndex()) + 1;
         this.factors.remove(f1);
         this.factors.remove(f2);
         Factor new_f = new Factor(new_factor, ind);
@@ -371,8 +371,8 @@ public class VariableElimination {
 
     private String[] whichVariableToJoin(Factor f1, Factor f2){
         ArrayList<String> vars2Join = new ArrayList<>();
-        String[] f1_vars = f1.name.split(",");
-        String[] f2_vars = f2.name.split(",");
+        String[] f1_vars = f1.getCleanName().split(",");
+        String[] f2_vars = f2.getCleanName().split(",");
         for(int i = 0; i < f1_vars.length; i++){
             for(int j = 0; j < f2_vars.length; j++){
                 if(!f1_vars[i].equals("") && !f2_vars[j].equals("")) {
@@ -428,7 +428,7 @@ public class VariableElimination {
      */
     private void Eliminate(Factor f, String hidden_name){
         HashMap<String, Double> new_CPT = new HashMap<>();
-        String[] keys = f.factor.keySet().toArray(new String[0]);
+        String[] keys = f.getTable().keySet().toArray(new String[0]);
         ArrayList<String> values_to_sum = new ArrayList<>();
         for(int i = 0; i < keys.length; i++){
             values_to_sum.add(keys[i]);
@@ -465,14 +465,14 @@ public class VariableElimination {
             double value = 0;
             if (!new_CPT.containsKey(key)) {
                 for (String val : values_to_sum) {
-                    value += f.factor.get(val);
+                    value += f.getTable().get(val);
                 }
                 this.addActions += values_to_sum.size() - 1;
                 new_CPT.put(key, value);
             }
             values_to_sum.clear();
         }
-        int ind = Integer.parseInt(this.factors.get(this.factors.size() - 1).index) + 1;
+        int ind = Integer.parseInt(this.factors.get(this.factors.size() - 1).getIndex()) + 1;
         this.factors.remove(f);
         Factor new_factor = new Factor(new_CPT, ind);
         this.factors.add(new_factor);
@@ -526,21 +526,21 @@ public class VariableElimination {
 
     private void sortFactorsByOrder(ArrayList<Factor> factors){
         factors.sort((o1, o2) -> {
-            Integer s1 = o1.size;
-            Integer s2 = o2.size;
+            Integer s1 = o1.getSize();
+            Integer s2 = o2.getSize();
             int sComp = s1.compareTo(s2);
             if (sComp != 0) {
                 return sComp;
             }
-            Integer str1 = SumByAscii(o1.name);
-            Integer str2 = SumByAscii(o2.name);
+            Integer str1 = SumByAscii(o1.getName());
+            Integer str2 = SumByAscii(o2.getName());
             return str1.compareTo(str2);
         });
     }
 
 
     private int SumByAscii(String str) {
-        str = str.replaceAll("[f()1-9]+", "");
+        str = str.replaceAll("[f()0-9]+", "");
         String[] arr = str.split(",");
         int sum = 0;
         for (String s : arr) {

@@ -1,14 +1,28 @@
 import java.util.HashMap;
 
 public class Factor {
-    public String name;
-    public HashMap<String, Double> factor;
-    public int size;
-    String index;
+    // Fields:
+
+    // String represents the Factor name, format is: "f(v1,v2...vn)i"
+    // v1,v2...vn -> Variables in this Factor.
+    // i -> the index of this Factor.
+    private String name;
+
+    // HashMap that the key is a String and the value is a double,
+    // at the first initiate the HashMap is identical to the CPT of the Variable.
+    // Throughout the Variable Elimination Algorithm the table can be
+    // joined/eliminate with other factors and modified into a new table.
+    private HashMap<String, Double> table;
+
+    // Size of this Factor HashMap.
+    private int size;
+
+    // Index of this Factor.
+    private String index;
 
 
     public Factor(HashMap<String, Double> CPT, int ind) {
-        this.factor = CPT;
+        this.table = CPT;
         this.index = Integer.toString(ind);
         String temp = CPT.keySet().toString().split("\\),")[0];
         this.size = CPT.size();
@@ -40,7 +54,7 @@ public class Factor {
 
 
     public void removeValue(String key, String s){
-        this.factor.remove(key);
+        this.table.remove(key);
         String[] name = this.name.split(",");
         String newName = "";
         for(String n: name){
@@ -51,20 +65,53 @@ public class Factor {
         if(newName.length() > 1) {
             this.name = newName.substring(1);
         }
-        this.size = this.factor.size();
+        this.size = this.table.size();
     }
 
 
     public String getName(){
         return "f(" + this.name + ")" + this.index;
     }
+    public String getCleanName(){
+        return this.name;
+    }
+
 
 
 
     public String toString(){
         String output = "Name: " + getName() + "\n";
-        output += "CPT: " + this.factor.toString() + "\n";
+        output += "CPT: " + this.table.toString() + "\n";
         output += "CPT size: " + this.size + "\n";
         return output;
+    }
+
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public HashMap<String, Double> getTable() {
+        return this.table;
+    }
+
+    public void setTable(HashMap<String, Double> table) {
+        this.table = table;
+    }
+
+    public int getSize() {
+        return this.size;
+    }
+
+    public void setSize(int size) {
+        this.size = size;
+    }
+
+    public String getIndex() {
+        return this.index;
+    }
+
+    public void setIndex(String index) {
+        this.index = index;
     }
 }

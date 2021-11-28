@@ -1,8 +1,10 @@
 import java.util.ArrayList;
 
 public class Network {
+    // Field.
     private final ArrayList<Variable> net;
 
+    // Constructor.
     public Network() {
         this.net = new ArrayList<>();
     }
