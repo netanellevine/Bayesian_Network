@@ -20,7 +20,7 @@ public class Factor {
     // Index of this Factor.
     private String index;
 
-
+    // Constructor.
     public Factor(HashMap<String, Double> CPT, int ind) {
         this.table = CPT;
         this.index = Integer.toString(ind);
@@ -52,7 +52,11 @@ public class Factor {
         this.name = this.name.substring(1);
     }
 
-
+    /**
+     * This method remove a line from the Factor CPT.
+     * @param key - String represents the key of the value that needs to be deleted.
+     * @param s - String represents the name of the variable-outcome that needs to be deleted.
+     */
     public void removeValue(String key, String s){
         this.table.remove(key);
         String[] name = this.name.split(",");
