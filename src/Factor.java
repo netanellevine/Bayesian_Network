@@ -72,6 +72,7 @@ public class Factor {
     public String getName(){
         return "f(" + this.name + ")" + this.index;
     }
+
     public String getCleanName(){
         return this.name;
     }
@@ -87,31 +88,18 @@ public class Factor {
     }
 
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public HashMap<String, Double> getTable() {
         return this.table;
     }
 
-    public void setTable(HashMap<String, Double> table) {
-        this.table = table;
-    }
 
     public int getSize() {
         return this.size;
     }
 
-    public void setSize(int size) {
-        this.size = size;
-    }
 
     public String getIndex() {
         return this.index;
     }
 
-    public void setIndex(String index) {
-        this.index = index;
-    }
 }
