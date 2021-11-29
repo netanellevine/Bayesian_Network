@@ -7,7 +7,7 @@ public class VariableElimination {
     private Variable query;
 
     // The outcome that we need to calculate for the question.
-    private String queryOutcome;
+    private String query_outcome;
 
     // List with all the given Variables in the question.
     private final ArrayList<Variable> evidence;
@@ -17,16 +17,16 @@ public class VariableElimination {
 
     // List of String with all the names of the hidden Variable (sorted by the elimination order),
     // that needs to be eliminated during the Algorithm.
-    private final ArrayList<String> hiddenByOrder;
+    private final ArrayList<String> hidden_by_order;
 
     // The Bayesian Network with all the data.
     private final Network network;
 
     // The amount of multiply actions were made during the Algorithm.
-    private int multiplyActions = 0;
+    private int multiply_actions = 0;
 
     // The amount of add actions were made during the Algorithm.
-    private int addActions = 0;
+    private int add_actions = 0;
 
     // The answer to the question in String, rounded to 5 digits after the point.
     private final String answer;
@@ -46,7 +46,7 @@ public class VariableElimination {
     public VariableElimination(String question, Network n) {
         this.network = n;
         this.evidence = new ArrayList<>();
-        this.hiddenByOrder = new ArrayList<>();
+        this.hidden_by_order = new ArrayList<>();
         double answerIsKnown = ifAnswerIsKnown(question);
         if (answerIsKnown == -1) {
             parseToQuestion(question);
@@ -54,7 +54,7 @@ public class VariableElimination {
             int ind = 1;
             this.question = question;
             copyEvidence(question);
-            removeIrrelevant(question);
+            removeIrrelevant();
             for (Variable v : this.network.getNet()) {
                 Factor f = new Factor(v.getCPT(), ind++);
                 this.factors.add(f);
@@ -110,7 +110,7 @@ public class VariableElimination {
 
         // extract query outcome from the string.
         ind1 = q.indexOf("|");
-        this.queryOutcome = q.substring(ind2 + 1, ind1);
+        this.query_outcome = q.substring(ind2 + 1, ind1);
 
         // extract all the evidence from the string.
         q = q.substring(ind1 + 1);
@@ -126,7 +126,7 @@ public class VariableElimination {
         }
         // extract elimination order from the string.
         String[] h = q.replace(" ", "").split("-");
-        Collections.addAll(this.hiddenByOrder, h);
+        Collections.addAll(this.hidden_by_order, h);
     }
 
 
@@ -134,12 +134,9 @@ public class VariableElimination {
      * This method removes a Factor from the Factors list if the Factor table has only 1 value.
      * <p><b>This method is one of the ways to try reducing the runtime of this Algorithm</b>
      */
-    private void removeIfOneValued(){
-        for(int i = 0; i < this.factors.size(); i++){
-            if(this.factors.get(i).getSize() == 1){
-                this.factors.remove(i);
-                i--;
-            }
+    private void removeIfOneValued(Factor f){
+            if(f.getSize() == 1){
+                this.factors.remove(f);
         }
     }
 
@@ -199,14 +196,38 @@ public class VariableElimination {
 
 
     /**
-     *
+     * <h1>VariableEliminationAlgo() method</h1>
+     * This method is the purpose of this class, based on a known Algorithm called Variable Elimination.<p>
+     * <b>steps of this method:</b>
+     * <p>1) Call method removeIrrelevantLines() to delete irrelevant lines.
+     * <p>2) First loop iterates @hidden_by_order until its empty, at each iteration it eliminates one
+     * hidden from @hidden_by_order.
+     * <p>3) Inside the main loop, another loop that iterates all over the factors and adds
+     * a Factor to @factors_to_join if it contains the hidden Variable.
+     * <p>4) Join -> while @factors_to_join is bigger than 1 (that means we can continue to do Join).
+     * <p>4.1) Call method sortFactorsByOrder(factors_to_join), to sort the list so that the Join
+     * will always be on the 2 smallest Factors.
+     * <p>4.2) Call method Join() with the first two factors on the list and add the factor returned
+     * from Join() to @factors_to_join.
+     * <p>4.3) Delete the first two factors from @factors_to_join. <b>repeat step 4</b>
+     * <p>5) Eliminate -> call method Eliminate() with the remaining factor from @factors_to_join and the
+     * String @h from @hidden_by_order.
+     * <p>6) Call method removeIfOneValued() to check if the factor created from the Eliminate method
+     * has a single line, if so delete it.
+     * <p>7) Remove @h from @hidden_by_order list, <b>repeat step 2</b>.
+     * <p>8) After finished with all the Join and Eliminate on the hidden variables, there may be more
+     * than 1 factor remaining. Keep doing Join on the first two factors from @factors till there is only 1 left.
+     * <p>9) In order to get the value we desire first needs to sum all the values in the remaining factor.
+     * Second take the value of @query with the @query_outcome and normalize it with the @sum_of_values
+     * (as in @value_ans / @sum_of_values).
+     * <p>10) return @value_ans.
      * @return - The answer to @question as a double.
+     * @see   <a href="https://en.wikipedia.org/wiki/Variable_elimination">Variable Elimination</a>
      */
     private double VariableEliminationAlgo(){
-        double value_ans;
         removeIrrelevantLines();
-        while(!this.hiddenByOrder.isEmpty()){
-            String h = this.hiddenByOrder.get(0) + "";
+        while(!this.hidden_by_order.isEmpty()){
+            String h = this.hidden_by_order.get(0) + "";
             int hidden_outcomes = this.network.getVariable(h).getOutcomes().length;
             ArrayList<Factor> factors_to_join = new ArrayList<>();
             for(Factor f: this.factors){
@@ -225,75 +246,83 @@ public class VariableElimination {
             }
             else {
                 Eliminate(factors_to_join.get(0), h);
-                removeIfOneValued();
+                removeIfOneValued(this.factors.get(this.factors.size() -1));
             }
-            this.hiddenByOrder.remove(h);
+            this.hidden_by_order.remove(h);
         }
         while(this.factors.size() > 1){
             Join(this.factors.get(0), this.factors.get(1));
         }
-        double sum_of_outcomes = 0;
+        double sum_of_values = 0;
+        double value_ans = 0;
         Factor f = this.factors.get(0);
         String[] f_keys = f.getTable().keySet().toArray(new String[0]);
-        String key = "";
         for(String k: f_keys){
-            sum_of_outcomes += f.getTable().get(k);
-            if(k.contains(this.query.getVar_name() + "=" + this.queryOutcome)){
-                key = k;
+            sum_of_values += f.getTable().get(k);
+            if(k.contains(this.query.getVar_name() + "=" + this.query_outcome)){
+                value_ans = f.getTable().get(k);
             }
         }
-        this.addActions += f_keys.length - 1;
-        value_ans = f.getTable().get(key) / sum_of_outcomes;
+        this.add_actions += f_keys.length - 1;
+        value_ans = value_ans / sum_of_values;
         return value_ans;
     }
 
 
     /**
      * This method checks whether a given Variable @ancestor is ancestor of a given Variable @var.
-     * @param var1 - the Variable to check if he is successor of @ancestor.
+     * @param var - the Variable to check if he is successor of @ancestor.
      * @param ancestor - the Variable to check if he is ancestor of @var1.
      * @return - True if @ancestor is ancestor of @var1 , False otherwise.
      */
-    private static boolean isAncestor(Variable var1, Variable ancestor){
+    private static boolean isAncestor(Variable var, Variable ancestor){
         if(ancestor == null || ancestor.getChildren().isEmpty()){
             return false;
         }
-        if(ancestor.getChildren().contains(var1)){
+        if(ancestor.getChildren().contains(var)){
             return true;
         }
         ArrayList<String> inheritances = new ArrayList<>();
-        for(Variable child : ancestor.getChildren()){
-            if(child.getChildren().contains(var1)){
+        for(Variable c : ancestor.getChildren()){
+            if(c.getChildren().contains(var)){
                 return true;
             }
-            inheritances.add(child.getVar_name());
+            inheritances.add(c.getVar_name());
             ArrayList<Variable> children = new ArrayList<>();
-            children.add(child);
+            children.add(c);
             while(!children.isEmpty()) {
-                if(children.get(0).getChildren().contains(var1)){
+                if(children.get(0).getChildren().contains(var)){
                     return true;
                 }
                 for (int i = 0; i < children.get(0).getChildren().size(); i++) {
-                    Variable var = children.get(0).getChildren().get(i);
-                    children.add(var);
-                    inheritances.add(var.getVar_name());
+                    Variable child = children.get(0).getChildren().get(i);
+                    children.add(child);
+                    inheritances.add(child.getVar_name());
                 }
                 children.remove(0);
             }
         }
-        return inheritances.contains(var1.getVar_name());
+        return inheritances.contains(var.getVar_name());
     }
 
     /**
-     *
-     * @param question
+     *This method checks if there are some Variables in the Network that are irrelevant for this question,
+     * if so it deletes them from the Network.
+     * <p>Irrelevant Variables are:
+     * <p>1) Variables that are conditionally independent with @query Variable given the @evidence Variables.
+     * <p>2) Variables that are not an ancestor of @query Variable or @evidence Variables.
+     * <p>3) Variables that are children of one of the Variables that is not relevant for this question
+     * <b>A.k.a. from steps 1 and 2 </b>.
+     * <p> In order to check conditionally independence we use BayesBallAlgo() method.
+     * <p> In order to check if a Variable is not an ancestor we use isAncestor() method.
+     * <p> In order to delete the children of the irrelevant variables we use deleteChildren() method.
      * <p><b>This method is one of the ways to try reducing the runtime of this Algorithm</b>
      */
-    private void removeIrrelevant(String question){
-        for (int i = 0; i < this.hiddenByOrder.size(); i++) {
-            String hidden = this.hiddenByOrder.get(i);
+    private void removeIrrelevant(){
+        for (int i = 0; i < this.hidden_by_order.size(); i++) {
+            String hidden = this.hidden_by_order.get(i);
             if(this.network.getVariable(hidden) == null){
-                this.hiddenByOrder.remove(hidden);
+                this.hidden_by_order.remove(hidden);
                 i--;
                 continue;
             }
@@ -302,7 +331,7 @@ public class VariableElimination {
             if(BayesBallAlgo.Bayes(this.network, q).equals("yes")){
                 deleteChildren(this.network.getVariable(hidden));
                 this.network.removeVariable(this.network.getVariable(hidden));
-                this.hiddenByOrder.remove(hidden);
+                this.hidden_by_order.remove(hidden);
                 i--;
             }
             else{
@@ -320,12 +349,13 @@ public class VariableElimination {
                 if(!ancestor) {
                     deleteChildren(this.network.getVariable(hidden));
                     this.network.removeVariable(this.network.getVariable(hidden));
-                    this.hiddenByOrder.remove(hidden);
+                    this.hidden_by_order.remove(hidden);
                     i--;
                 }
             }
         }
     }
+
 
     private void deleteChildren(Variable hidden) {
         if(hidden != null) {
@@ -385,7 +415,7 @@ public class VariableElimination {
                         double v1 = f1.getTable().get(f1_key);
                         double v2 = f2.getTable().get(f2_key);
                         double val = v1 * v2;
-                        this.multiplyActions++;
+                        this.multiply_actions++;
                         String key = generateNewKey(f1_key, f2_key);
                         new_factor.put(key, val);
                     }
@@ -463,7 +493,7 @@ public class VariableElimination {
      * 6) if found a matching key with difference only in the outcome of the hidden Variable add it to @values_to_sum.<p>
      * 7) break the loops if the size of @values_to_sum is equal to @number_of_hidden_outcomes.<p>
      * 8) sum all the values in @values_to_sum and add the value given with @key to @new_CPT.<p>
-     * 9) go back to 2) with i = i + 1.
+     * 9) <b>repeat step 2</b>.
      * @param f - Factor represents a CPT of an event.
      * @param hidden_name - String represents the name of the value to eliminate from the CPT of the Factor f.
      * therefore the size of the CPT is now: (size_of_original_CPT / amount_of_outcomes_of_hidden_var).
@@ -524,7 +554,7 @@ public class VariableElimination {
                     value += f.getTable().get(val);
                 }
                 // the amounts of add actions is the size of @values_to_sum - 1.
-                this.addActions += values_to_sum.size() - 1;
+                this.add_actions += values_to_sum.size() - 1;
                 new_CPT.put(key, value);
             }
             values_to_sum.clear();
@@ -619,13 +649,13 @@ public class VariableElimination {
     }
 
 
-    public int getMultiplyActions() {
-        return this.multiplyActions;
+    public int getMultiply_actions() {
+        return this.multiply_actions;
     }
 
 
-    public int getAddActions() {
-        return this.addActions;
+    public int getAdd_actions() {
+        return this.add_actions;
     }
 
 }

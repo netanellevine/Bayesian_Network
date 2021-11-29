@@ -26,7 +26,7 @@ public class Ex1 {
             inputReader parser = new inputReader(file_name);
             Network net = parser.getNet();
             VariableElimination VEA = new VariableElimination(value, net);
-            output += (VEA.getAnswer() + "," + VEA.getAddActions() + "," + VEA.getMultiplyActions()) + "\n";
+            output += (VEA.getAnswer() + "," + VEA.getAdd_actions() + "," + VEA.getMultiply_actions()) + "\n";
         }
         try {
             // write to output.
