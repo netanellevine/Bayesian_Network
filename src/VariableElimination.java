@@ -251,6 +251,7 @@ public class VariableElimination {
             this.hidden_by_order.remove(h);
         }
         while(this.factors.size() > 1){
+            sortFactorsByOrder(this.factors);
             Join(this.factors.get(0), this.factors.get(1));
         }
         double sum_of_values = 0;
@@ -356,7 +357,11 @@ public class VariableElimination {
         }
     }
 
-
+    /**
+     * This method receives a Variable that need to be deleted from the Network and checks if it has children,
+     * if so the method deletes them from this Network.
+     * @param hidden - Variable that are going to be deleted.
+     */
     private void deleteChildren(Variable hidden) {
         if(hidden != null) {
             if (hidden.getChildren().size() > 0) {
@@ -387,9 +392,11 @@ public class VariableElimination {
 
     /**
      * This method takes 2 factors and joining them into one.
-     * the Join process is similar to a Cartesian Multiplication,
-     * it multiplies only those who have the same outcome for one or more values.
-     * The Join method can increase the size of the table up to: original_size * sum_of_outcomes (of all the variables that are not in the Intersection between the two factors).
+     * the Join process is similar to a Cartesian Multiplication.
+     * It multiplies between the line with the same outcome for one or more values.
+     * <p>The Join method can increase the size of the table up to: original_size * sum_of_outcomes
+     * (of all the variables that are not in the Intersection between the two factors).
+     * <p>At the end of the method it deletes @f1 and @f2 from @factors list and adds @new_factor to @factors list.
      * @param f1 - Factor number 1.
      * @param f2 - Factor number 2.
      * @return new_factor - Factor that combines the CPT of both of the f1 and f2.
@@ -399,19 +406,19 @@ public class VariableElimination {
         String[] f2_keys = f2.getTable().keySet().toArray(new String[0]);
         String[] vars2Join = whichVariableToJoin(f1, f2);
         HashMap<String, Double> new_factor = new HashMap<>();
-        for (String s : vars2Join) {
+        for (String var2Join : vars2Join) {
             for (String f1_key : f1_keys) {
                 for (String f2_key : f2_keys) {
-                    String[] t = s.split(",");
+                    String[] v = var2Join.split(",");
                     int counter = 0;
-                    for (int j = 1; j < t.length; j++) {
-                        if (f1_key.contains(t[j]) && f2_key.contains(t[j])) {
+                    for (int j = 1; j < v.length; j++) {
+                        if (f1_key.contains(v[j]) && f2_key.contains(v[j])) {
                             counter++;
                         } else {
                             break;
                         }
                     }
-                    if (counter == t.length - 1) {
+                    if (counter == v.length - 1) {
                         double v1 = f1.getTable().get(f1_key);
                         double v2 = f2.getTable().get(f2_key);
                         double val = v1 * v2;
@@ -430,7 +437,13 @@ public class VariableElimination {
         return new_f;
     }
 
-
+    /**
+     * This method is a helper method to Join(), the purpose of this method is
+     * to return an array of String which will keep the Variables names that are stored both in @f1 and @f2.
+     * @param f1 - Factor number 1.
+     * @param f2 - Factor number 2.
+     * @return @ans - and Array of String Variables names.
+     */
     private String[] whichVariableToJoin(Factor f1, Factor f2){
         ArrayList<String> vars2Join = new ArrayList<>();
         String[] f1_vars = f1.getCleanName().split(",");
