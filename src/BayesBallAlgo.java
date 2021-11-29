@@ -40,6 +40,7 @@ public class BayesBallAlgo {
      * @return return TRUE if independent, dependent return FALSE.
      * @see <a href="https://www.andrew.cmu.edu/user/scheines/tutor/d-sep.html">D_seperation</a>
      */
+    // <img src="./doc_files/BayesBall.png" />
     private static boolean BayesBall(Variable src, Variable dest, Variable came_from, ArrayList<Variable> colored) {
         if (src.getVar_name().equals(dest.getVar_name())) {
             return false;
