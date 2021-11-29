@@ -28,15 +28,17 @@ public class BayesBallAlgo {
 
     /**
      * This method checks whether two Variables in the Network are Conditionally Independent or not.
-     * The rules of moving foreword in the Network (according to BayesBall Algorithm) is:
-     * in a current node there are two things that determine where can we go, 1) where we came from(father or child),
-     * 2) is the current node is evidence in the question or not.
-     * According to this information we can determine where to go.
+     * The rules of moving foreword in the Network (according to BayesBall Algorithm) is:<p>
+     * assuming were at a current node there are two things that determine where can we go:
+     * <p>1) Where we came from (father or child).
+     * <p>2) Is the current node is evidence in the question or not.
+     * <p>According to this information we can determine where to go.
      * @param src - Variable src, where we start to check if route exists.
      * @param dest - Variable dest, where we want to reach.
      * @param came_from - Variable came_from, where we came from.
      * @param colored - ArrayList<Variable> of the Variables we've been that we can't visit again.
      * @return return TRUE if independent, dependent return FALSE.
+     * @see <a href="https://www.andrew.cmu.edu/user/scheines/tutor/d-sep.html">D_seperation</a>
      */
     private static boolean BayesBall(Variable src, Variable dest, Variable came_from, ArrayList<Variable> colored) {
         if (src.getVar_name().equals(dest.getVar_name())) {

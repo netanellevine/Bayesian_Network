@@ -93,12 +93,13 @@ public class VariableElimination {
      * Parsing this String into all the data we need to know about this question and add the relevant data
      * to the class fields whom this data belongs to.
      * @param q - String of question,
-     *          the format of the String is:<p> "P(Q1=O1...Qn=On|E1=o1,...,En=on) Hv1-Hv2-...Hvn".<p>
-     *          - Q1...Qn -> the queries.<p>
-     *          - O1...On -> the appropriate outcome for each of the queries.<p>
-     *          - E1...En -> the evidence given.<p>
-     *          - o1...on -> the appropriate outcome for each of the evidence.<p>
-     *          - Hv1...Hvn -> the hidden variable by the order of the elimination.<p>
+     *          the format of the String is:<p> <b>"P(Q1=O1...Qn=On|E1=o1,...,En=on) Hv1-Hv2-...Hvn"</b>.<ul>
+     *          <li> Q1...Qn -> the queries.
+     *          <li> O1...On -> the appropriate outcome for each of the queries.
+     *          <li> E1...En -> the evidence given.
+     *          <li> o1...on -> the appropriate outcome for each of the evidence.
+     *          <li> Hv1...Hvn -> the hidden variable by the order of the elimination.
+     *          </ul>
      *          E.g. "P(B=T|J=T,M=T) A-E".
      */
     private void parseToQuestion(String q){
@@ -314,10 +315,13 @@ public class VariableElimination {
      * <p>2) Variables that are not an ancestor of @query Variable or @evidence Variables.
      * <p>3) Variables that are children of one of the Variables that is not relevant for this question
      * <b>A.k.a. from steps 1 and 2 </b>.
-     * <p> In order to check conditionally independence we use BayesBallAlgo() method.
-     * <p> In order to check if a Variable is not an ancestor we use isAncestor() method.
-     * <p> In order to delete the children of the irrelevant variables we use deleteChildren() method.
-     * <p><b>This method is one of the ways to try reducing the runtime of this Algorithm</b>
+     * <ul>
+     * <li> In order to check conditionally independence we use BayesBallAlgo() method.
+     * <li> In order to check if a Variable is not an ancestor we use isAncestor() method.
+     * <li> In order to delete the children of the irrelevant variables we use deleteChildren() method.
+     * </ul>
+     * <b>This method is one of the ways to try reducing the runtime of this Algorithm</b>
+     *
      */
     private void removeIrrelevant(){
         for (int i = 0; i < this.hidden_by_order.size(); i++) {
