@@ -18,6 +18,8 @@ public class BayesBallAlgo {
                 net.getVariable(evidence).setEvidence();
             }
         }
+        // The second part is to call the BayesBall method to check if Q1 is conditionally independent
+        // in Q2 given the evidence. return yes of independent no for dependent.
         ArrayList<Variable> colored = new ArrayList<>();
         boolean independent = BayesBall(Q1, Q2, null, colored);
         net.resetEvidence();

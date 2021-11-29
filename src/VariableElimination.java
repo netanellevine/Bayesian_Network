@@ -1,20 +1,48 @@
 import java.util.*;
 
 public class VariableElimination {
+    // Fields:
+
+    // Variable that the question is being asked about.
     private Variable query;
+
+    // The outcome that we need to calculate for the question.
     private String queryOutcome;
+
+    // List with all the given Variables in the question.
     private final ArrayList<Variable> evidence;
-    private String copyOfEvidence;
+
+    // List with all the Factors from the Network that are relevant for this question.
     private ArrayList<Factor> factors;
+
+    // List of String with all the names of the hidden Variable (sorted by the elimination order),
+    // that needs to be eliminated during the Algorithm.
     private final ArrayList<String> hiddenByOrder;
+
+    // The Bayesian Network with all the data.
     private final Network network;
+
+    // The amount of multiply actions were made during the Algorithm.
     private int multiplyActions = 0;
+
+    // The amount of add actions were made during the Algorithm.
     private int addActions = 0;
+
+    // The answer to the question in String, rounded to 5 digits after the point.
     private final String answer;
+
+    // The question asked, the format is:
+    // P(q1=T|e1=T,e2=T) h1-h2 , q1 -> is the query , e1,e2 -> are the evidence, h1,h2 -> are the hidden.
+    // for example: P(B=T|J=T,M=T) A-E.
     private String question;
 
+    // String that copies the evidence just like the format of the question,
+    // used only to narrow down the amount of calculations by deleting irrelevant Variables.
+    private String copyOfEvidence;
 
 
+
+    // Constructor.
     public VariableElimination(String question, Network n) {
         this.network = n;
         this.evidence = new ArrayList<>();
@@ -31,18 +59,19 @@ public class VariableElimination {
                 Factor f = new Factor(v.getCPT(), ind++);
                 this.factors.add(f);
             }
-            this.answer = VariableEliminationAlgo();
+            this.answer = String.valueOf((double)Math.round(VariableEliminationAlgo() * 100000d) / 100000d);
         } else {
             this.answer = String.valueOf((double)Math.round(answerIsKnown * 100000d) / 100000d);
         }
     }
 
     /**
-     * This method checks if the question given is already known in the network
+     * This method checks if the question given is already known in the network,
      * it iterates through all the variables and if it finds a key that is identical to the question
-     * it returns the variable name who belongs the value.
+     * it returns its value.
+     * <p><b>This method is one of the ways to try reducing the runtime of this Algorithm</b>
      * @param q - String of question.
-     * @return - returns String of variable name if found a match "NO!" otherwise.
+     * @return - returns the value if found, otherwise returns -1.
      */
     private double ifAnswerIsKnown(String q) {
         String split = q.split(" ")[0];
@@ -60,16 +89,16 @@ public class VariableElimination {
 
 
     /**
-     * This method receives a String q represent the question we've been asked about.
+     * This method receives a String @q represents the question we've been asked about.
      * Parsing this String into all the data we need to know about this question and add the relevant data
-     * to the class field which this data belongs to.
+     * to the class fields whom this data belongs to.
      * @param q - String of question,
-     *          the format of the String is "P(Q1=O1...Qn=On|E1=o1,...,En=on) Hv1-Hv2-...Hvn".
-     *          Q1...Qn -> the queries.
-     *          O1...On -> the appropriate outcome for each of the queries.
-     *          E1...En -> the evidence given.
-     *          o1...on -> the appropriate outcome for each of the evidence.
-     *          Hv1...Hvn -> the hidden variable by the order of the elimination.
+     *          the format of the String is:<p> "P(Q1=O1...Qn=On|E1=o1,...,En=on) Hv1-Hv2-...Hvn".<p>
+     *          - Q1...Qn -> the queries.<p>
+     *          - O1...On -> the appropriate outcome for each of the queries.<p>
+     *          - E1...En -> the evidence given.<p>
+     *          - o1...on -> the appropriate outcome for each of the evidence.<p>
+     *          - Hv1...Hvn -> the hidden variable by the order of the elimination.<p>
      *          E.g. "P(B=T|J=T,M=T) A-E".
      */
     private void parseToQuestion(String q){
@@ -95,23 +124,16 @@ public class VariableElimination {
             ind2 = q.contains(",") ? q.indexOf(",") : q.indexOf(")");
             q = q.substring(ind2 + 1);
         }
-
         // extract elimination order from the string.
         String[] h = q.replace(" ", "").split("-");
         Collections.addAll(this.hiddenByOrder, h);
-//        this.hiddenByOrder.addAll(List.of(q.replace(" ", "").split("-")));
     }
 
 
-
-    private void copyEvidence(String q){
-        int start = q.indexOf("|");
-        int end = q.indexOf(")");
-        this.copyOfEvidence = q.substring(start, end);
-    }
-
-
-
+    /**
+     * This method removes a Factor from the Factors list if the Factor table has only 1 value.
+     * <p><b>This method is one of the ways to try reducing the runtime of this Algorithm</b>
+     */
     private void removeIfOneValued(){
         for(int i = 0; i < this.factors.size(); i++){
             if(this.factors.get(i).getSize() == 1){
@@ -124,9 +146,11 @@ public class VariableElimination {
 
     /**
      * This method goes over all the factors, and reduce them by deleting all the irrelevant lines (values).
-     * Irrelevant lines are lines that one or more of the @evidence of this class outcomes are not as given in the Query.
-     * Therefore, because we have an outcome that we know already. It's unnecessary to keep all the values of the other outcomes
+     * Irrelevant lines are lines that at least 1 outcome (of an evidence variable)
+     * from the key is not the same as the outcome of the evidence outcome given.
+     * Therefore, because we have an outcome that we know already, it's unnecessary to keep all the values of the other outcomes
      * because we know that they can't happen.
+     * <p><b>This method is one of the ways to try reducing the runtime of this Algorithm</b>
      */
     private void removeIrrelevantLines() {
         String[] evidence = this.copyOfEvidence.substring(1).split(",");
@@ -174,8 +198,12 @@ public class VariableElimination {
     }
 
 
-
-    private String VariableEliminationAlgo(){
+    /**
+     *
+     * @return - The answer to @question as a double.
+     */
+    private double VariableEliminationAlgo(){
+        double value_ans;
         removeIrrelevantLines();
         while(!this.hiddenByOrder.isEmpty()){
             String h = this.hiddenByOrder.get(0) + "";
@@ -215,8 +243,8 @@ public class VariableElimination {
             }
         }
         this.addActions += f_keys.length - 1;
-        double value = f.getTable().get(key) / sum_of_outcomes;
-        return String.valueOf((double)Math.round(value * 100000d) / 100000d);
+        value_ans = f.getTable().get(key) / sum_of_outcomes;
+        return value_ans;
     }
 
 
@@ -256,7 +284,11 @@ public class VariableElimination {
         return inheritances.contains(var1.getVar_name());
     }
 
-
+    /**
+     *
+     * @param question
+     * <p><b>This method is one of the ways to try reducing the runtime of this Algorithm</b>
+     */
     private void removeIrrelevant(String question){
         for (int i = 0; i < this.hiddenByOrder.size(); i++) {
             String hidden = this.hiddenByOrder.get(i);
@@ -422,6 +454,16 @@ public class VariableElimination {
     /**
      * This method eliminate the hidden variable from the CPT of a given factor.
      * The purpose of this method is to reduce the size of the CPT which will save run time in the next calculations.
+     * The steps of this method are:<p>
+     * 1) initialize @new_CPT, @keys[], @values_to_sum (@values_to_sum size needs to be the number of the hidden Variable outcomes).<p>
+     * 2) iterate through all the keys (main loop).<p>
+     * 3) add the first key.<p>
+     * 4) create a String (@add_by) with all the outcomes of the key you've added except the part with the hidden variable and it's outcome.<p>
+     * 5) iterate through all the keys (inside the main loop) until you've added enough keys the @values_to_sum.<p>
+     * 6) if found a matching key with difference only in the outcome of the hidden Variable add it to @values_to_sum.<p>
+     * 7) break the loops if the size of @values_to_sum is equal to @number_of_hidden_outcomes.<p>
+     * 8) sum all the values in @values_to_sum and add the value given with @key to @new_CPT.<p>
+     * 9) go back to 2) with i = i + 1.
      * @param f - Factor represents a CPT of an event.
      * @param hidden_name - String represents the name of the value to eliminate from the CPT of the Factor f.
      * therefore the size of the CPT is now: (size_of_original_CPT / amount_of_outcomes_of_hidden_var).
@@ -430,43 +472,58 @@ public class VariableElimination {
         HashMap<String, Double> new_CPT = new HashMap<>();
         String[] keys = f.getTable().keySet().toArray(new String[0]);
         ArrayList<String> values_to_sum = new ArrayList<>();
+        // iterate through all the keys.
         for(int i = 0; i < keys.length; i++){
-            values_to_sum.add(keys[i]);
-            String[] t1 = keys[i].substring(2, keys[i].length() - 1).split(",");
+            values_to_sum.add(keys[i]); // always add the first key.
+            // split @keys[i] by "," in order to get all the Variables name that are in this key.
+            String[] split_key = keys[i].substring(2, keys[i].length() - 1).split(",");
+            // @add_by purpose is to show us which variable from the key we need to keep after the elimination.
             String add_by = "";
-            for(String t: t1){
-                if(!t.contains(hidden_name)){
-                    add_by += "," + t;
+            // iterate through all the variables in @split_key.
+            for(String var_name: split_key){
+                // if @var_name does not contain the @hidden_name
+                if(!var_name.contains(hidden_name)){
+                    add_by += "," + var_name;
                 }
             }
-            if(add_by.length() > 1) {
-                add_by = add_by.substring(1);
-            }
+            add_by = add_by.length() > 1 ? add_by.substring(1): add_by;
             String key = "P(" + add_by + ")";
-            int amount_of_outcomes = this.network.getVariable(hidden_name).getOutcomes().length;
+            // iterate through all the keys.
             for(int j = 0; j < keys.length; j++){
+                // no need to check if @keys[j] needs to be added if i == j and @values_to_sum already contains
+                // @keys[j], this if help to avoid putting the same key twice.
                 if(i != j && !values_to_sum.contains(keys[j])) {
-                    String[] split_key = keys[j].substring(2, keys[j].indexOf(")")).split(",");
+                    // same as for @keys[i].
+                    split_key = keys[j].substring(2, keys[j].indexOf(")")).split(",");
                     String add_by_copy = "";
+                    // same as @add_by.
                     for(String var: split_key){
                         if(add_by.contains(var)){
                             add_by_copy += "," + var;
                         }
                     }
                     add_by_copy = add_by_copy.length() > 0 ? add_by_copy.substring(1): add_by_copy;
+                    // if @add_by equals to @add_by_copy it means that keys[j] has the same outcomes
+                    // that need to be sum, and we can sum keys[i] with keys[j].
                     if(add_by.equals(add_by_copy)){
                         values_to_sum.add(keys[j]);
                     }
-                    if(values_to_sum.size() == amount_of_outcomes){
+                    int number_of_hidden_outcomes = this.network.getVariable(hidden_name).getOutcomes().length;
+                    // if the size of @values_to_sum has the same number of the hidden outcomes it
+                    // means we've added enough keys to @values_to_sum.
+                    if(values_to_sum.size() == number_of_hidden_outcomes){
                         break;
                     }
                 }
             }
             double value = 0;
+            // just for precaution.
             if (!new_CPT.containsKey(key)) {
+                // sum all the values in @values_to_sum.
                 for (String val : values_to_sum) {
                     value += f.getTable().get(val);
                 }
+                // the amounts of add actions is the size of @values_to_sum - 1.
                 this.addActions += values_to_sum.size() - 1;
                 new_CPT.put(key, value);
             }
@@ -508,40 +565,37 @@ public class VariableElimination {
     }
 
 
-    /** This method receives a String of a factor_name and returns
-     * the identical Factor itself.
-     * @param factor_name - String of a factor name.
-     * @return Factor curr_factor - the factor of the given name factor_name.
-     * In case of factor_name wasn't found in the factors list @return null.
+    /**
+     * This method sorting a List of Factors in order to determine the order of their Join.
+     * <p>There are two keys to determine the sort:<p> 1) table size.<p> 2) sum by ascii.<p>
+     * if f1 size is smaller than f2 size then f1 index is smaller than f2 index.
+     * if they have the same size -> compare them by the sum of their ascii value.
+     * <p>the sort is by ascending order.
+     * @param factors - List of Factors.
      */
-    private Factor getFactor(String factor_name){
-        for(Factor curr_factor : this.factors){
-            if(curr_factor.getName().equals(factor_name)){
-                return curr_factor;
-            }
-        }
-        return null;
-    }
-
-
     private void sortFactorsByOrder(ArrayList<Factor> factors){
-        factors.sort((o1, o2) -> {
-            Integer s1 = o1.getSize();
-            Integer s2 = o2.getSize();
+        factors.sort((f1, f2) -> {
+            Integer s1 = f1.getSize();
+            Integer s2 = f2.getSize();
             int sComp = s1.compareTo(s2);
             if (sComp != 0) {
                 return sComp;
             }
-            Integer str1 = SumByAscii(o1.getName());
-            Integer str2 = SumByAscii(o2.getName());
-            return str1.compareTo(str2);
+            Integer sum1 = SumByAscii(f1.getName());
+            Integer sum2 = SumByAscii(f2.getName());
+            return sum1.compareTo(sum2);
         });
     }
 
 
-    private int SumByAscii(String str) {
-        str = str.replaceAll("[f()0-9]+", "");
-        String[] arr = str.split(",");
+    /**
+     * This method is used to sum the ascii value of a factor in order to sort it later.
+     * @param factor_name - String of the factor_name.
+     * @return sum - int of the sum by ascii of the factor name.
+     */
+    private int SumByAscii(String factor_name) {
+        factor_name = factor_name.replaceAll("[f()0-9]+", "");
+        String[] arr = factor_name.split(",");
         int sum = 0;
         for (String s : arr) {
             for (int j = 0; j < s.length(); j++) {
@@ -550,6 +604,13 @@ public class VariableElimination {
             }
         }
         return sum;
+    }
+
+
+    private void copyEvidence(String q){
+        int start = q.indexOf("|");
+        int end = q.indexOf(")");
+        this.copyOfEvidence = q.substring(start, end);
     }
 
 

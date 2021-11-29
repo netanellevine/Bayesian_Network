@@ -12,13 +12,13 @@ public class Factor {
     // at the first initiate the HashMap is identical to the CPT of the Variable.
     // Throughout the Variable Elimination Algorithm the table can be
     // joined/eliminate with other factors and modified into a new table.
-    private HashMap<String, Double> table;
+    private final HashMap<String, Double> table;
 
     // Size of this Factor HashMap.
     private int size;
 
     // Index of this Factor.
-    private String index;
+    private final String index;
 
     // Constructor.
     public Factor(HashMap<String, Double> CPT, int ind) {
@@ -72,18 +72,27 @@ public class Factor {
         this.size = this.table.size();
     }
 
-
+    /**
+     *
+     * @return - String of the name with all the chars that makes it more comfortable to understand.
+     */
     public String getName(){
         return "f(" + this.name + ")" + this.index;
     }
 
+    /**
+     *
+     * @return - String of the name without any sign chars.
+     */
     public String getCleanName(){
         return this.name;
     }
 
 
-
-
+    /**
+     *
+     * @return - String with the main data of this factor: 1) name, 2) CPT, 3) CPT size.
+     */
     public String toString(){
         String output = "Name: " + getName() + "\n";
         output += "CPT: " + this.table.toString() + "\n";
