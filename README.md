@@ -9,6 +9,7 @@ event B didn't happen".
 This type of questions are being answered by using two familiar Algorithms:
 * Bayes Ball Algorithm (also known an D-Separation). 
 * Variable Elimination Algorithm.
+___
 ## About:
 
 
