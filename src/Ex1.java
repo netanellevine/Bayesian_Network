@@ -5,12 +5,13 @@ import java.util.ArrayList;
 
 public class Ex1 {
     public static void main(String[] args) {
-        writeToOutput("input.txt");
+        writeToOutput("input2.txt");
     }
 
     public static void writeToOutput(String file_name){
         // parse the file in the class inputReader which activates the class XmlParser for the Xml parsing.
         inputReader firstParse = new inputReader(file_name);
+        System.out.println( firstParse.getNet());
         // all the Variable Elimination question.
         ArrayList<String> VEQ = firstParse.getVE_questions();
         // all the Bayes Ball questions.
