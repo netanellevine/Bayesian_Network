@@ -11,7 +11,7 @@ This type of questions are being answered by using two familiar Algorithms:
 * Variable Elimination Algorithm.
 ___
 ## About:
-
+Note: need to finish...
 
 
 
