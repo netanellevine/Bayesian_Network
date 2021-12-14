@@ -1,8 +1,8 @@
 # Bayesian Network
 
 ## Summery:  
-*_A, B, C, are variables in the network representing an event_*   
-This project is implementing Bayesian Network and answering questions such as:
+This project is implementing Bayesian Network and answering questions such as:  
+  ***_A, B, C, are variables in the network representing an event_***   
 * "Are A and B Conditionally independent given an evidence C". 
 * "What is the probability that an event A will happen given that an 
 event B didn't happen".    
