@@ -13,8 +13,7 @@
 
 ## About The Project
 In this project, I've implemented a Bayesian Network in Java programming language.  
-**Bayesian network**  - (also known as a Bayes network, Bayes net, belief network, or decision network) is a probabilistic   
-graphical model that represents a set of variables and their conditional dependencies via a directed acyclic graph (DAG).  
+**Bayesian network**  - (also known as a Bayes network, Bayes net, belief network, or decision network) is a probabilistic graphical model that represents a set of variables and their conditional dependencies via a directed acyclic graph (DAG).  
 The variables are called **nodes** and the conditional dependencies are called **edges**.  
 The Bayesian network is a **probabilistic model** that describes the probability of an event, given a set of possible events.  
 [See more - Wikipedia](https://en.wikipedia.org/wiki/Bayesian_network)  
