@@ -5,7 +5,14 @@ import java.util.ArrayList;
 
 public class Ex1 {
     public static void main(String[] args) {
-        writeToOutput("input2.txt");
+        try{
+//            if (args[0].equals("input.txt") || args[0].equals("input1.txt") || args[0].equals("input2.txt")){
+                writeToOutput(args[0]);
+//            }
+        }
+        catch (Exception e){
+            writeToOutput("input.txt");
+        }
     }
 
     public static void writeToOutput(String file_name){
