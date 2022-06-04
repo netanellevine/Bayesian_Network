@@ -55,11 +55,10 @@ ___
 The purpose of this algorithm is to determine if two variables in the graph are independent given other variables as evidence, the given conditional statement shown as ```Xa q Xb | Xc```  when we ask the algorithm if ```Xa``` and ```Xb``` are independents given ```Xc``` as evidence.  
 The format of the query should be:
 ````
-variable1-variable2|evidence1=outcome1,evidence2=outcome2...
+variable1-variable2|evidence1,evidence2...
 ````
 Where `variable1` and `variable2` are the variables we want to determine if they are independent given the evidence.  
-The `evidence1` and `evidence2` are the variables we want to use as evidence.  
-The `outcome1` and `outcome2` are the outcomes of the evidence variables.  
+`evidence1` and `evidence2` are the variables we want to use as evidence.   
 _Note that the query can have 0 evidence variables._  
 
 The Algorithm is as follows:
@@ -75,6 +74,8 @@ The Algorithm is as follows:
 5. Else - there is a valid path between Xa and Xb nodes, then they must be conditionally dependent.
 ```
 [See more - Article of Ross D. Shachter who created this algorithm](https://arxiv.org/ftp/arxiv/papers/1301/1301.7412.pdf)
+
+**Example**
 
 <img src="src/doc_files/bayesball_example.png" width="500" height="250"/>
 
